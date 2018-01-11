@@ -25,7 +25,7 @@
 -export([
     levels/0, level_to_num/1, level_to_chr/1,
     num_to_level/1, config_to_mask/1, config_to_levels/1, mask_to_levels/1,
-    open_logfile/2, ensure_logfile/4, rotate_logfile/2, format_time/0, format_time/1,
+    open_logfile/2, ensure_logfile/4, rotate_logfile/2, rotate_logfile2/2, format_time/0, format_time/1,
     localtime_ms/0, localtime_ms/1, maybe_utc/1, parse_rotation_date_spec/1,
     calculate_next_rotation/1, validate_trace/1, check_traces/4, is_loggable/3,
     trace_filter/1, trace_filter/2, expand_path/1, find_file/2, check_hwm/1, check_hwm/2,
@@ -227,6 +227,32 @@ rotate_logfile(File, 1) ->
 rotate_logfile(File, Count) ->
     _ = file:rename(File ++ "." ++ integer_to_list(Count - 2), File ++ "." ++ integer_to_list(Count - 1)),
     rotate_logfile(File, Count - 1).
+
+%% renames failing are OK
+rotate_logfile2(File, -1) ->
+    file:delete(File);
+rotate_logfile2(File, 0) ->
+    {Y, M, D} = yesterday(),
+    DateFormat = lists:concat([".", Y, '_', M, '_', D, ".log"]),
+    case file:rename(File, filename:rootname(File) ++ DateFormat) of
+        ok ->
+            ok;
+        _ ->
+            rotate_logfile2(File, -1)
+    end;
+rotate_logfile2(File, Count) ->
+    {Y, M, D} = yesterday(),
+    DateFormat = lists:concat([".", Y, '_', M, '_', D, ".", Count - 1, ".log"]),
+    File2 = File ++ "." ++ integer_to_list(Count - 1),
+    _ =  file:rename(File2, filename:rootname(File) ++ DateFormat),
+    rotate_logfile2(File, Count - 1).
+
+yesterday() ->
+    {M, S, _} = os:timestamp(),
+    YDate = M * 1000000 + S - 86400,
+    DT = calendar:gregorian_seconds_to_datetime(YDate + calendar:datetime_to_gregorian_seconds({{1970, 1, 1}, {0, 0, 0}})),
+    {{Year, Moth, Day}, _} = erlang:universaltime_to_localtime(DT),
+    {Year, Moth, Day}.
 
 format_time() ->
     format_time(maybe_utc(localtime_ms())).

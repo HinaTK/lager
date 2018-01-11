@@ -184,7 +184,7 @@ handle_event(_Event, State) ->
 
 %% @private
 handle_info({rotate, File}, #state{name=File,count=Count,date=Date} = State) ->
-    _ = lager_util:rotate_logfile(File, Count),
+    _ = lager_util:rotate_logfile2(File, Count),
     State1 = close_file(State),
     schedule_rotation(File, Date),
     {ok, State1};

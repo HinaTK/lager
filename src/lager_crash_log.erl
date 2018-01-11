@@ -100,7 +100,7 @@ handle_cast(_Request, State) ->
 
 %% @private
 handle_info(rotate, #state{name=Name, count=Count, date=Date} = State) ->
-    _ = lager_util:rotate_logfile(Name, Count),
+    _ = lager_util:rotate_logfile2(Name, Count),
     schedule_rotation(Date),
     {noreply, State};
 handle_info(_Info, State) ->
