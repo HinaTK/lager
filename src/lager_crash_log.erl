@@ -102,7 +102,7 @@ handle_cast(_Request, State) ->
 handle_info(rotate, #state{name=Name, count=Count, date=Date} = State) ->
     _ = lager_util:rotate_logfile2(Name, Count),
     schedule_rotation(Date),
-    {noreply, State};
+    {noreply, State#state{count = 0}};
 handle_info(_Info, State) ->
     {noreply, State}.
 

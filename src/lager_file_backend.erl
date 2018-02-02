@@ -187,7 +187,7 @@ handle_info({rotate, File}, #state{name=File,count=Count,date=Date} = State) ->
     _ = lager_util:rotate_logfile2(File, Count),
     State1 = close_file(State),
     schedule_rotation(File, Date),
-    {ok, State1};
+    {ok, State1#state{count = 0}};
 handle_info({shaper_expired, Name}, #state{shaper=Shaper, name=Name, formatter=Formatter, formatter_config=FormatConfig} = State) ->
     Report = io_lib:format(
                "lager_file_backend dropped ~p messages in the last second that exceeded the limit of ~p messages/sec",

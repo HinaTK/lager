@@ -254,6 +254,7 @@ yesterday() ->
     {{Year, Moth, Day}, _} = erlang:universaltime_to_localtime(DT),
     {Year, Moth, Day}.
 
+
 format_time() ->
     format_time(maybe_utc(localtime_ms())).
 
